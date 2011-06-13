@@ -81,14 +81,8 @@ add_action('wp_head', 'DonorsChoosePlugin::set_head');
 /**
  * Add shortcode
  */
-// [bartag foo="foo-value"]
 function dcm_shortcode( $atts ) {
-	extract( shortcode_atts( array(
-		'foo' => 'something',
-		'bar' => 'something else',
-	), $atts ) );
-    
-    
+    // http://codex.wordpress.org/Shortcode_API
 	return DonorsChoosePlugin::get_projects();
 }
 add_shortcode( 'donorschooseme', 'dcm_shortcode' );
