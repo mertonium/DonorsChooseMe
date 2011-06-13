@@ -23,7 +23,7 @@ License: GPL2
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
+define('WP_DEBUG', true);
 /**
  * Admin section
  */
@@ -76,26 +76,40 @@ function dcm_plugin_options() {
 /**
  * Add the action to inject the stylesheet/js files into the header
  */
-add_action('wp_head', 'DonorsChoosePlugin::set_head');
+add_action('wp_head', 'DonorsChooseMePlugin::set_head');
 
 /**
  * Add shortcode
  */
 function dcm_shortcode( $atts ) {
     // http://codex.wordpress.org/Shortcode_API
-	return DonorsChoosePlugin::get_projects();
+	return DonorsChooseMePlugin::get_projects();
 }
 add_shortcode( 'donorschooseme', 'dcm_shortcode' );
 
 /**
+ * Widgetize the plugin
+ */
+register_sidebar_widget('DonorsChoose Me', 'DonorsChooseMePlugin::widget');
+
+/**
  * Main class
  */
-class DonorsChoosePlugin {
+class DonorsChooseMePlugin {
     
     public static function set_head() {
         $siteurl = get_option('siteurl');
         $url = $siteurl . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/dcm_styles.css';
         echo "<link rel='stylesheet' type='text/css' href='$url' />\n";
+    }
+    
+    public static function widget($args) {
+        error_log(print_r($args, 1));
+        extract($args);
+        echo $before_widget;
+        echo $before_title . 'DonorsChoose.org Projects' . $after_title;
+        echo self::get_projects();
+        echo $after_widget;
     }
     
     public static function get_projects() {
@@ -104,7 +118,7 @@ class DonorsChoosePlugin {
         // SF   174.253.235.90
         // GOOG 74.125.224.82
         // ALIEN 64.34.193.13 
-        $ip = '64.34.193.13'; //gethostbyname($_SERVER['SERVER_NAME']);
+        $ip = '174.253.235.90'; //gethostbyname($_SERVER['SERVER_NAME']);
 
         $ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
         $ip_info = explode(';', $ip_data);
