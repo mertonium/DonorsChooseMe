@@ -125,18 +125,20 @@ class DonorsChooseMePlugin {
         $ip = $_SERVER['REMOTE_ADDR']; //gethostbyname($_SERVER['SERVER_NAME']);
 
         //$ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
-        $ip_url = 'http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip;
+        //$ip_url = 'http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip;
+        $ip_url = 'http://www.geoplugin.net/php.gp?ip='.$ip;
         $ip_data = self::curl_this($ip_url);
-        
-        $ip_info = explode(';', $ip_data);
-        $ip_info = explode(';', $ip_data);
+
+        $ip_info = unserialize($ip_data);
+//error_log('ip info =');
+//error_log(print_r($ip_info, 1));
 
         if($ip_info[0] === "ERROR") {
             $ip_latlng[0] = '40.96797434499278';
             $ip_latlng[1] = '-91.55096054077148';
         } else {
-            $ip_latlng[0] = $ip_info[8];
-            $ip_latlng[1] = $ip_info[9];
+            $ip_latlng[0] = $ip_info['geoplugin_latitude'];
+            $ip_latlng[1] = $ip_info['geoplugin_longitude'];
         }
         $ret = '';
         $dc_url = 'http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_latlng[0].'&centerLng='.$ip_latlng[1];

@@ -6,10 +6,11 @@
 
 .dc-project img {
     width: 75px;
-    height: 75px;
     float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }
 
-.dc-project .dc-project-info {
-
+.dc-project .dc-project-location {
+    font-size: 0.8em;
 }
