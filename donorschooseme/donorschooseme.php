@@ -73,11 +73,36 @@ function dcm_plugin_options() {
     <?php
 }
 
+/**
+ * Add the action to inject the stylesheet/js files into the header
+ */
+add_action('wp_head', 'DonorsChoosePlugin::set_head');
+
+/**
+ * Add shortcode
+ */
+// [bartag foo="foo-value"]
+function dcm_shortcode( $atts ) {
+	extract( shortcode_atts( array(
+		'foo' => 'something',
+		'bar' => 'something else',
+	), $atts ) );
+    
+    
+	return DonorsChoosePlugin::get_projects();
+}
+add_shortcode( 'donorschooseme', 'dcm_shortcode' );
 
 /**
  * Main class
  */
 class DonorsChoosePlugin {
+    
+    public static function set_head() {
+        $siteurl = get_option('siteurl');
+        $url = $siteurl . '/wp-content/plugins/' . basename(dirname(__FILE__)) . '/dcm_styles.css';
+        echo "<link rel='stylesheet' type='text/css' href='$url' />\n";
+    }
     
     public static function get_projects() {
     	$options = get_option('dcm_donorschoose_stuff');
@@ -106,9 +131,9 @@ class DonorsChoosePlugin {
             foreach($projects as $proj) {
                 $ret .= self::render_project_html($proj);
             }
-            echo $ret;
+            return $ret;
         } else {
-            echo 'Could not connect to page.';
+            return 'Could not connect to page.';
         }
     }
 
