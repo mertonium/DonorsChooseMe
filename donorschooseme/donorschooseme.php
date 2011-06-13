@@ -109,7 +109,6 @@ class DonorsChooseMePlugin {
     }
     
     public static function widget($args) {
-        error_log(print_r($args, 1));
         extract($args);
         echo $before_widget;
         echo $before_title . 'DonorsChoose.org Projects' . $after_title;
@@ -123,7 +122,7 @@ class DonorsChooseMePlugin {
         // SF   174.253.235.90
         // GOOG 74.125.224.82
         // ALIEN 64.34.193.13 
-        $ip = '174.253.235.90'; //gethostbyname($_SERVER['SERVER_NAME']);
+        $ip = $_SERVER['REMOTE_ADDR']; //gethostbyname($_SERVER['SERVER_NAME']);
 
         //$ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
         $ip_url = 'http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip;
@@ -142,9 +141,7 @@ class DonorsChooseMePlugin {
         $ret = '';
         $dc_url = 'http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_latlng[0].'&centerLng='.$ip_latlng[1];
         $data = self::curl_this($dc_url);
-error_log($dc_url);
-error_log('data = ');
-error_log(print_r(trim($data), 1));        
+
         if($data) {
             $json_data = json_decode($data);
             $num_projects = (intval($options['num_projects']) > 0) ? intval($options['num_projects']) : 3;
