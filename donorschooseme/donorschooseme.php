@@ -56,11 +56,6 @@ function dcm_plugin_options() {
                     <a href="http://developer.donorschoose.org/help-contact" target="_blank">Register for key here.</a>
                 </div>
                 <div class="dcm-admin-options">
-                    <label for="dcm_donorschoose_stuff[ipinfodb_key]">IPInfoDB API Key:</label>
-                    <input type="text" name="dcm_donorschoose_stuff[ipinfodb_key]" value="<?php echo $options['ipinfodb_key']; ?>" size="70" /><br />
-                    <a href="http://ipinfodb.com/register.php" target="_blank">Register for key here.</a>
-                </div>
-                <div class="dcm-admin-options">
                     <label for="dcm_donorschoose_stuff[num_projects]">Number of projects to display:</label>
                     <input type="text" name="dcm_donorschoose_stuff[num_projects]" value="<?php echo $options['num_projects']; ?>" size="2" /><br />
                     <em>This is the number of DonorsChoose.org projects to display.</em>
@@ -95,10 +90,10 @@ add_shortcode( 'donorschooseme', 'dcm_shortcode' );
 /**
  * Widgetize the plugin
  */
-register_sidebar_widget('DonorsChoose Me', 'DonorsChooseMePlugin::widget');
+//register_sidebar_widget('DonorsChoose Me', 'DonorsChooseMePlugin::widget');
 
 /**
- * Main class
+ * Main plugin class
  */
 class DonorsChooseMePlugin {
     
@@ -116,22 +111,28 @@ class DonorsChooseMePlugin {
         echo $after_widget;
     }
     
+    /**
+     * Retrieve all of the relevant projects from DonorsChoose.org
+     * 
+     * @return A string of HTML which represents all of the projects returned from the DonorsChoose.org API
+     */
     public static function get_projects() {
     	$options = get_option('dcm_donorschoose_stuff');
     	$ip_latlng = array();
-        // SF   174.253.235.90
-        // GOOG 74.125.224.82
-        // ALIEN 64.34.193.13 
-        $ip = $_SERVER['REMOTE_ADDR']; //gethostbyname($_SERVER['SERVER_NAME']);
+    	
+    	/** 
+    	 * Some IPs for testing
+         * SF   174.253.235.90
+         * GOOG 74.125.224.82
+         * UK   64.34.193.13 
+         */
+        
+        $ip = ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? '174.253.235.90' : $_SERVER['REMOTE_ADDR'];
 
-        //$ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
-        //$ip_url = 'http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip;
         $ip_url = 'http://www.geoplugin.net/php.gp?ip='.$ip;
         $ip_data = self::curl_this($ip_url);
 
         $ip_info = unserialize($ip_data);
-//error_log('ip info =');
-//error_log(print_r($ip_info, 1));
 
         if($ip_info[0] === "ERROR") {
             $ip_latlng[0] = '40.96797434499278';
@@ -147,16 +148,25 @@ class DonorsChooseMePlugin {
         if($data) {
             $json_data = json_decode($data);
             $num_projects = (intval($options['num_projects']) > 0) ? intval($options['num_projects']) : 3;
+            
+            // Slice off the number of projects that we want
             $projects = array_slice($json_data->proposals, 0, $num_projects);
             foreach($projects as $proj) {
+                // Build our html
                 $ret .= self::render_project_html($proj);
             }
             return $ret;
         } else {
-            return 'Could not connect to page.';
+            return 'Could not connect to DonorsChoose.org.';
         }
     }
-
+    
+    /**
+     * Build a single project html block
+     * 
+     * @param $project A project (proposal) object from the DonorsChoose.org API
+     * @return A string of HTML which represents the given project
+     */
     private function render_project_html($project) {
         $html = '<div class="dc-project">'.
                 '<img src="'.$project->imageURL.'" />'.
@@ -169,6 +179,12 @@ class DonorsChooseMePlugin {
         return $html;
     }
     
+    /**
+     * Internal cURL wrapper
+     * 
+     * @param $url The URL to be cURL'ed
+     * @return The result of the cURL operation
+     */
     private function curl_this($url) {
         $ch=curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -180,4 +196,61 @@ class DonorsChooseMePlugin {
     }
     
 }
+
+/**
+ * Class for the widgetizing of the plugin
+ */
+class DonorsChooseMeWidget extends WP_Widget {
+ 
+    // Constructor
+    function DonorsChooseMeWidget() {
+        $widget_ops = array('classname' => 'widget_donorschooseme', 'description' => __('Displays projects from DonorsChoose.org that your readers may find interesting.') );
+        $this->WP_Widget('donorschooseme-widget', __('DonorsChoose Me'), $widget_ops); 
+    }
+    
+    /**
+     * Outputs the options form on admin in Appearance => Widgets (backend).
+     */
+    function form($instance) {
+        //  Assigns values
+        $instance = wp_parse_args( (array) $instance, array( 'title' => 'DonorsChoose.org Projects' ) );
+        $title = strip_tags($instance['title']);
+        ?>
+            <p><label for="<?php echo $this->get_field_id('title'); ?>"><?php echo __('Title'); ?>: <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo attribute_escape($title); ?>" /></label></p>
+        <?php
+
+    }
+    
+    /**
+     * Processes widget options to be saved.
+     */
+    function update($new_instance, $old_instance) {
+        $instance = $old_instance;
+        $instance['title'] = strip_tags($new_instance['title']);
+
+        return $instance;
+    }
+    
+    /**
+     *  Outputs the content of the widget
+     */
+    function widget($args,$instance) {
+
+        extract($args);
+
+        //  Get the title of the widget and the specified width of the image
+        $title = empty($instance['title']) ? ' ' : apply_filters('widget_title', $instance['title']);
+
+        //  Outputs the widget in its standard ul li format.
+        echo $before_widget;
+        if (!empty( $title )) {
+            echo $before_title . $title . $after_title;
+        };
+        
+        echo DonorsChooseMePlugin::get_projects();
+        echo $after_widget;
+    }
+}
+
+add_action('widgets_init', create_function('', 'return register_widget("DonorsChooseMeWidget");'));
 ?>
