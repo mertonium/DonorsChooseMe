@@ -24,20 +24,75 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * Admin section
+ */
+add_action('admin_menu', 'dcm_projects_menu');
+
+function dcm_projects_menu() {
+	add_options_page('Donors Choose Me Options', 'DonorsChoose Me', 'manage_options', 'dcm-options', 'dcm_plugin_options');
+}
+
+function dcm_options_init() {
+    register_setting('dcm-options','dcm_donorschoose_stuff');
+}
+
+add_action('admin_init', 'dcm_options_init' );
+
+
+function dcm_plugin_options() {
+	if (!current_user_can('manage_options'))  {
+		wp_die( __('You do not have sufficient permissions to access this page.') );
+	}
+	$options = get_option('dcm_donorschoose_stuff');
+	?>
+	    <div class="wrap">
+            <h2>DonorsChoose Me Options</h2>
+            <form method="post" action="options.php">
+                <?php settings_fields('dcm-options'); ?>
+                <div class="dcm-admin-options">
+                    <label for="dcm_donorschoose_stuff[dc_api_key]">DonorsChoose.org API Key:</label>
+                    <input type="text" name="dcm_donorschoose_stuff[dc_api_key]" value="<?php echo $options['dc_api_key']; ?>" /><br />
+                    <a href="http://developer.donorschoose.org/help-contact" target="_blank">Register for key here.</a>
+                </div>
+                <div class="dcm-admin-options">
+                    <label for="dcm_donorschoose_stuff[ipinfodb_key]">IPInfoDB API Key:</label>
+                    <input type="text" name="dcm_donorschoose_stuff[ipinfodb_key]" value="<?php echo $options['ipinfodb_key']; ?>" size="70" /><br />
+                    <a href="http://ipinfodb.com/register.php" target="_blank">Register for key here.</a>
+                </div>
+                <p class="submit">
+                    <input type="submit" class="button-primary" value="<?php _e('Save Changes'); ?>" />
+                </p>
+            </form>
+        </div>
+        <style type="text/css">
+            .dcm-admin-options {
+                margin-bottom: 1em;
+            }
+        </style>
+    <?php
+}
+
+
+/**
+ * Main class
+ */
 class DonorsChoosePlugin {
     
     public static function get_projects() {
+    	$options = get_option('dcm_donorschoose_stuff');
         // SF   174.253.235.90
-        // GOOG 74.125.224.82 
-        $ip = '174.253.235.90'; //gethostbyname($_SERVER['SERVER_NAME']);
+        // GOOG 74.125.224.82
+        // ALIEN 64.34.193.13 
+        $ip = '64.34.193.13'; //gethostbyname($_SERVER['SERVER_NAME']);
     echo '<h1>' . $ip . '</h1>';
-        $ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key=cf74017054f12362f1ddecbf26ca61d8ab8acc5253573cdfe1a7f7255a4fdcc2&ip='.$ip);
+        $ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
         if($ip_data) {
             $ip_info = explode(';', $ip_data);
             print_r($ip_info);
         }
         $ret = '';
-        $data = file_get_contents('http://api.donorschoose.org/common/json_feed.html?APIKey=DONORSCHOOSE&centerLat='.$ip_info[8].'&centerLng='.$ip_info[9]);
+        $data = file_get_contents('http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_info[8].'&centerLng='.$ip_info[9]);
         if($data) {
             $json_data = json_decode($data);
             $projects = array_slice($json_data->proposals, 0, 3);
