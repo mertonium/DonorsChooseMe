@@ -60,6 +60,11 @@ function dcm_plugin_options() {
                     <input type="text" name="dcm_donorschoose_stuff[ipinfodb_key]" value="<?php echo $options['ipinfodb_key']; ?>" size="70" /><br />
                     <a href="http://ipinfodb.com/register.php" target="_blank">Register for key here.</a>
                 </div>
+                <div class="dcm-admin-options">
+                    <label for="dcm_donorschoose_stuff[num_projects]">Number of projects to display:</label>
+                    <input type="text" name="dcm_donorschoose_stuff[num_projects]" value="<?php echo $options['num_projects']; ?>" size="2" /><br />
+                    <em>This is the number of DonorsChoose.org projects to display.</em>
+                </div>
                 <p class="submit">
                     <input type="submit" class="button-primary" value="<?php _e('Save Changes'); ?>" />
                 </p>
@@ -135,7 +140,8 @@ class DonorsChooseMePlugin {
         $data = file_get_contents('http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_latlng[0].'&centerLng='.$ip_latlng[1]);
         if($data) {
             $json_data = json_decode($data);
-            $projects = array_slice($json_data->proposals, 0, 3);
+            $num_projects = (intval($options['num_projects']) > 0) ? intval($options['num_projects']) : 3;
+            $projects = array_slice($json_data->proposals, 0, $num_projects);
             foreach($projects as $proj) {
                 $ret .= self::render_project_html($proj);
             }
@@ -148,9 +154,11 @@ class DonorsChooseMePlugin {
     private function render_project_html($project) {
         $html = '<div class="dc-project">'.
                 '<img src="'.$project->imageURL.'" />'.
-                '<span class="dc-project-title"><a class="dc-project-link" href="'.$project->proposalURL.'">'.$project->title.'</a></span>'.
-                '<span class="dc-project-location">'.$project->zone->name.', '.$project->state.'</span>'.
-                '<span class="dc-project-funding-appeal"><a class="dc-project-funding-link" href="'.$project->fundURL.'">'.$project->costToComplete.'</a></span>'.
+                '<div class="dc-project-info">'.
+                '<div class="dc-project-title"><a class="dc-project-link" href="'.$project->proposalURL.'">'.$project->title.'</a></div>'.
+                '<div class="dc-project-location">'.$project->zone->name.', '.$project->state.'</div>'.
+                '<div class="dc-project-funding-appeal"><a class="dc-project-funding-link" href="'.$project->fundURL.'">'.$project->percentFunded.'% funded</a></div>'.
+                '</div>'.
                 '</div>';
         return $html;
     }

@@ -1,8 +1,15 @@
 .dc-project {
-    width: 200px;
+    width: 100%;
+    clear: left;
+    margin-bottom: 1em;
 }
 
 .dc-project img {
-    width: 150px;
-    height: 150px;
+    width: 75px;
+    height: 75px;
+    float: left;
+}
+
+.dc-project .dc-project-info {
+
 }
