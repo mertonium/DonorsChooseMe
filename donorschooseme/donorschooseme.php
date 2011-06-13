@@ -125,7 +125,10 @@ class DonorsChooseMePlugin {
         // ALIEN 64.34.193.13 
         $ip = '174.253.235.90'; //gethostbyname($_SERVER['SERVER_NAME']);
 
-        $ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
+        //$ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
+        $ip_url = 'http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip;
+        $ip_data = self::curl_this($ip_url);
+        
         $ip_info = explode(';', $ip_data);
         $ip_info = explode(';', $ip_data);
 
@@ -137,7 +140,11 @@ class DonorsChooseMePlugin {
             $ip_latlng[1] = $ip_info[9];
         }
         $ret = '';
-        $data = file_get_contents('http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_latlng[0].'&centerLng='.$ip_latlng[1]);
+        $dc_url = 'http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_latlng[0].'&centerLng='.$ip_latlng[1];
+        $data = self::curl_this($dc_url);
+error_log($dc_url);
+error_log('data = ');
+error_log(print_r(trim($data), 1));        
         if($data) {
             $json_data = json_decode($data);
             $num_projects = (intval($options['num_projects']) > 0) ? intval($options['num_projects']) : 3;
@@ -161,6 +168,16 @@ class DonorsChooseMePlugin {
                 '</div>'.
                 '</div>';
         return $html;
+    }
+    
+    private function curl_this($url) {
+        $ch=curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER,0); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $ret_val = curl_exec($ch);
+        curl_close($ch);
+        return $ret_val;
     }
     
 }
