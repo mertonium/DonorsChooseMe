@@ -81,18 +81,25 @@ class DonorsChoosePlugin {
     
     public static function get_projects() {
     	$options = get_option('dcm_donorschoose_stuff');
+    	$ip_latlng = array();
         // SF   174.253.235.90
         // GOOG 74.125.224.82
         // ALIEN 64.34.193.13 
         $ip = '64.34.193.13'; //gethostbyname($_SERVER['SERVER_NAME']);
-    echo '<h1>' . $ip . '</h1>';
+
         $ip_data = file_get_contents('http://api.ipinfodb.com/v3/ip-city/?key='.$options['ipinfodb_key'].'&ip='.$ip);
-        if($ip_data) {
-            $ip_info = explode(';', $ip_data);
-            print_r($ip_info);
+        $ip_info = explode(';', $ip_data);
+        $ip_info = explode(';', $ip_data);
+
+        if($ip_info[0] === "ERROR") {
+            $ip_latlng[0] = '40.96797434499278';
+            $ip_latlng[1] = '-91.55096054077148';
+        } else {
+            $ip_latlng[0] = $ip_info[8];
+            $ip_latlng[1] = $ip_info[9];
         }
         $ret = '';
-        $data = file_get_contents('http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_info[8].'&centerLng='.$ip_info[9]);
+        $data = file_get_contents('http://api.donorschoose.org/common/json_feed.html?APIKey='.$options['dc_api_key'].'&centerLat='.$ip_latlng[0].'&centerLng='.$ip_latlng[1]);
         if($data) {
             $json_data = json_decode($data);
             $projects = array_slice($json_data->proposals, 0, 3);
@@ -114,5 +121,6 @@ class DonorsChoosePlugin {
                 '</div>';
         return $html;
     }
+    
 }
 ?>
