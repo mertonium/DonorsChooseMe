@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Donors Choose Me
-Plugin URI: http://URI_Of_Page_Describing_Plugin_and_Updates
+Plugin URI: http://mertonium.com/donorschoose-projects-near-me-wordpress-plugin/
 Description: A brief description of the Plugin.
-Version: 0.0
+Version: 0.1
 Author: John Mertens
 Author URI: http://mertonium.com
 License: GPL2
