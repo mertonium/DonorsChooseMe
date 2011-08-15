@@ -163,7 +163,7 @@ class DonorsChooseMePlugin {
      * @return A string of HTML which represents the given project
      */
     private function render_project_html($project) {
-        $funding_link = ($project->percentFunded) ? '<a class="dc-project-funding-link" href="'.$project->fundURL.'">'.$project->percentFunded.'% funded</a>' : '';
+        $funding_link = ($project->percentFunded) ? '<a class="dc-project-funding-link" href="'.$project->proposalURL.'">'.$project->percentFunded.'% funded</a>' : '';
         $html = '<div class="dc-project">'.
                 '<img src="'.$project->imageURL.'" />'.
                 '<div class="dc-project-info">'.
