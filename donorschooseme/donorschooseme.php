@@ -3,7 +3,7 @@
 Plugin Name: Donors Choose Me
 Plugin URI: http://mertonium.com/donorschoose-projects-near-me-wordpress-plugin/
 Description: A brief description of the Plugin.
-Version: 0.1
+Version: 0.2
 Author: John Mertens
 Author URI: http://mertonium.com
 License: GPL2
@@ -88,11 +88,6 @@ function dcm_shortcode( $atts ) {
 add_shortcode( 'donorschooseme', 'dcm_shortcode' );
 
 /**
- * Widgetize the plugin
- */
-//register_sidebar_widget('DonorsChoose Me', 'DonorsChooseMePlugin::widget');
-
-/**
  * Main plugin class
  */
 class DonorsChooseMePlugin {
@@ -172,7 +167,7 @@ class DonorsChooseMePlugin {
                 '<img src="'.$project->imageURL.'" />'.
                 '<div class="dc-project-info">'.
                 '<div class="dc-project-title"><a class="dc-project-link" href="'.$project->proposalURL.'">'.$project->title.'</a></div>'.
-                '<div class="dc-project-location">'.$project->zone->name.', '.$project->state.'</div>'.
+                '<div class="dc-project-location">'.$project->city.', '.$project->state.'</div>'.
                 '<div class="dc-project-funding-appeal"><a class="dc-project-funding-link" href="'.$project->fundURL.'">'.$project->percentFunded.'% funded</a></div>'.
                 '</div>'.
                 '</div>';
@@ -213,7 +208,7 @@ class DonorsChooseMeWidget extends WP_Widget {
      */
     function form($instance) {
         //  Assigns values
-        $instance = wp_parse_args( (array) $instance, array( 'title' => 'DonorsChoose.org Projects' ) );
+        $instance = wp_parse_args( (array) $instance, array( 'title' => 'Classroom Project Near You' ) );
         $title = strip_tags($instance['title']);
         ?>
             <p><label for="<?php echo $this->get_field_id('title'); ?>"><?php echo __('Title'); ?>: <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo attribute_escape($title); ?>" /></label></p>
@@ -252,5 +247,8 @@ class DonorsChooseMeWidget extends WP_Widget {
     }
 }
 
+/**
+ * Activate the widget
+ */
 add_action('widgets_init', create_function('', 'return register_widget("DonorsChooseMeWidget");'));
 ?>
