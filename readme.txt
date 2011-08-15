@@ -2,7 +2,7 @@
 Contributors: mertonium
 Tags: charity, donorschoose, education, widget, geolocation
 Requires at least: 2.8
-Tested up to: 3.13
+Tested up to: 3.1.3
 Stable tag: trunk
 
 This plugin displays DonorsChoose.org projects in the vicinity of the user (based on their IP address).
