@@ -209,7 +209,7 @@ class DonorsChooseMeWidget extends WP_Widget {
      */
     function form($instance) {
         //  Assigns values
-        $instance = wp_parse_args( (array) $instance, array( 'title' => 'Classroom Project Near You' ) );
+        $instance = wp_parse_args( (array) $instance, array( 'title' => 'Classroom Projects Near You' ) );
         $title = strip_tags($instance['title']);
         ?>
             <p><label for="<?php echo $this->get_field_id('title'); ?>"><?php echo __('Title'); ?>: <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo attribute_escape($title); ?>" /></label></p>
